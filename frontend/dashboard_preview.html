@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dhaga Return Intelligence — sample</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,520;9..144,640&family=Outfit:wght@380;480;580&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #1c1915;
+      --muted: #6b6258;
+      --line: #e4d9cc;
+      --paper: #f3eee6;
+      --card: #fffcf8;
+      --navy: #1b2830;
+      --clay: #8f3d32;
+      --clay-soft: #f8ebe6;
+      --ok: #1f6b4a;
+      --ok-soft: #e7f4ec;
+      --wait: #8a5a12;
+      --wait-soft: #fbf3e4;
+      --bar: #c46a4a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Outfit, sans-serif;
+      font-weight: 380;
+    }
+    button, select { font-family: inherit; }
+    .app { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+    aside {
+      background: var(--navy);
+      color: #f6f1ea;
+      padding: 28px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .brand { display: flex; gap: 12px; align-items: center; }
+    .mark {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: #c46a4a;
+      display: grid; place-items: center;
+      font-family: Fraunces, serif; font-weight: 640;
+    }
+    .brand h1 { margin: 0; font-family: Fraunces, serif; font-size: 18px; font-weight: 640; }
+    .brand p { margin: 2px 0 0; color: #c9bfb4; font-size: 12px; }
+    nav { display: flex; flex-direction: column; gap: 6px; }
+    nav button {
+      text-align: left; border: 0; background: transparent; color: #e7dfd6;
+      padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 14px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    nav button.active { background: #2a3b46; color: white; }
+    .badge {
+      background: var(--clay); color: white; border-radius: 99px;
+      min-width: 22px; height: 22px; display: grid; place-items: center;
+      font-size: 12px; padding: 0 6px;
+    }
+    .side-note { margin-top: auto; color: #b7aea4; font-size: 12px; line-height: 1.45; }
+    main { padding: 28px 32px 48px; max-width: 1100px; }
+    .eyebrow { letter-spacing: 0.08em; text-transform: uppercase; font-size: 11px; color: var(--clay); margin: 0 0 6px; }
+    h2 { font-family: Fraunces, serif; font-weight: 640; font-size: 32px; margin: 0; }
+    .sub { color: var(--muted); margin: 8px 0 0; max-width: 640px; line-height: 1.45; }
+    .banner {
+      margin-top: 18px; background: #fff8ee; border: 1px solid #ead7b8;
+      color: #6d5018; border-radius: 12px; padding: 10px 14px; font-size: 13px;
+    }
+    .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 22px; }
+    .card {
+      background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px;
+    }
+    .kpi span { display: block; color: var(--muted); font-size: 13px; }
+    .kpi strong { display: block; font-family: Fraunces, serif; font-size: 36px; margin-top: 4px; }
+    .kpi em { font-style: normal; color: var(--muted); font-size: 12px; }
+    .grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 14px; margin-top: 14px; }
+    h3 { margin: 0 0 14px; font-size: 16px; font-weight: 580; }
+    .row { display: grid; grid-template-columns: 168px 1fr 28px; gap: 8px; align-items: center; margin-bottom: 8px; font-size: 13px; }
+    .track { height: 8px; background: #f0e7dc; border-radius: 99px; overflow: hidden; }
+    .fill { height: 100%; background: var(--bar); border-radius: 99px; }
+    .sku-head { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
+    select {
+      border: 1px solid var(--line); background: white; border-radius: 10px; padding: 8px 10px; color: var(--ink);
+    }
+    .meta { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+    .pill { background: var(--clay-soft); color: var(--clay); border-radius: 99px; padding: 4px 10px; font-size: 12px; }
+    .pill.ok { background: var(--ok-soft); color: var(--ok); }
+    .action {
+      background: #f7f1e8; border-radius: 12px; padding: 12px 14px; font-size: 14px; line-height: 1.4;
+    }
+    blockquote {
+      margin: 8px 0 0; padding: 8px 12px; border-left: 3px solid #e0b5a6; background: #fff;
+      border-radius: 0 10px 10px 0; font-size: 14px;
+    }
+    .sizes { margin-top: 12px; }
+    .hidden { display: none; }
+    .queue { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
+    .review {
+      background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px;
+    }
+    .review header { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
+    .quote { font-family: Fraunces, serif; font-size: 22px; margin: 8px 0; }
+    .warn { color: var(--wait); background: var(--wait-soft); border-radius: 10px; padding: 8px 10px; font-size: 13px; }
+    .actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+    .actions button, .ghost {
+      border-radius: 10px; padding: 8px 12px; cursor: pointer; border: 1px solid var(--line); background: white;
+    }
+    .actions button.primary { background: var(--navy); color: white; border-color: var(--navy); }
+    .actions button.danger { color: var(--clay); }
+    .empty { color: var(--muted); padding: 28px 0; }
+    .upload {
+      margin-top: 18px; border: 1.5px dashed #d9cbbd; border-radius: 16px; padding: 28px; background: var(--card);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 8px; }
+    th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 480; font-size: 12px; }
+    @media (max-width: 860px) {
+      .app { grid-template-columns: 1fr; }
+      aside { padding: 16px; }
+      nav { flex-direction: row; flex-wrap: wrap; }
+      .side-note { display: none; }
+      .kpis, .grid { grid-template-columns: 1fr; }
+      main { padding: 20px 16px 40px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand">
+        <div class="mark">ध</div>
+        <div>
+          <h1>Dhaga</h1>
+          <p>Return Intelligence</p>
+        </div>
+      </div>
+      <nav>
+        <button id="nav-dashboard" class="active" type="button">Dashboard</button>
+        <button id="nav-review" type="button">Review <span class="badge" id="review-count">0</span></button>
+        <button id="nav-upload" type="button">Upload</button>
+      </nav>
+      <p class="side-note">Internal tool for Neha, Category. Accepted labels only. Dismissed rows stay off this dashboard.</p>
+    </aside>
+    <main>
+      <p class="eyebrow">Sample · after review</p>
+      <h2 id="title">What “Other” actually says</h2>
+      <p class="sub" id="subtitle">Counts below use labels Neha has already accepted. Rows still in review are not included.</p>
+      <div class="banner">Sample file, not the case-study mix. The brief says 44% of returns are “Other”. It does not say how that bucket splits. Approving or dismissing a card updates this screen.</div>
+
+      <section id="view-dashboard">
+        <div class="kpis">
+          <article class="card kpi"><span>Other rows in file</span><strong id="kpi-total">0</strong><em>uploaded sample</em></article>
+          <article class="card kpi"><span>Accepted</span><strong id="kpi-accepted">0</strong><em>counted on this dashboard</em></article>
+          <article class="card kpi"><span>In review</span><strong id="kpi-review">0</strong><em>excluded until Neha decides</em></article>
+        </div>
+        <div class="grid">
+          <article class="card">
+            <h3>Accepted labels</h3>
+            <div id="label-bars"></div>
+          </article>
+          <article class="card">
+            <div class="sku-head">
+              <h3>One SKU</h3>
+              <select id="sku-select" aria-label="SKU"></select>
+            </div>
+            <div id="sku-detail"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="view-review" class="hidden">
+        <div class="queue" id="queue"></div>
+      </section>
+
+      <section id="view-upload" class="hidden">
+        <div class="upload">
+          <h3>returns_other_sample.csv</h3>
+          <p class="sub">Preview only. The real upload arrives with the MVP. This file is the sample already loaded.</p>
+          <table>
+            <thead><tr><th>Check</th><th>Result</th></tr></thead>
+            <tbody id="upload-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+    const LABELS = {
+      fit_too_small: "Fit · too small",
+      fit_too_tight: "Fit · too tight",
+      fit_too_loose: "Fit · too loose",
+      fit_too_large: "Fit · too large",
+      size_chart_mismatch: "Fit · size chart",
+      quality_fabric: "Quality · fabric",
+      quality_stitching_or_damage: "Quality · stitch or damage",
+      colour_image_mismatch: "Colour · image mismatch",
+      description_or_look_mismatch: "Expectation · look or copy",
+      insufficient_evidence: "Not enough evidence",
+      not_a_product_issue: "Not a product issue"
+    };
+    const ACTIONS = {
+      fit_too_small: "Review this vendor’s size chart for this SKU.",
+      fit_too_tight: "Review this vendor’s size chart for this SKU.",
+      fit_too_loose: "Review this vendor’s size chart for this SKU.",
+      fit_too_large: "Review this vendor’s size chart for this SKU.",
+      size_chart_mismatch: "Review this vendor’s size chart for this SKU.",
+      colour_image_mismatch: "Compare the listing images with these quotes.",
+      quality_fabric: "Raise fabric with the vendor. Do not edit the listing automatically.",
+      quality_stitching_or_damage: "Raise stitch or damage with the vendor. Do not edit the listing automatically.",
+      description_or_look_mismatch: "Review the product copy against these quotes.",
+      insufficient_evidence: "No catalogue action.",
+      not_a_product_issue: "No catalogue action. This is not a fit or product defect."
+    };
+
+    const state = {
+      dismissed: 2,
+      accepted: [
+        { sku: "KURTI123", vendor: "Jaipur Vendor 14", size: "M", label: "fit_too_small", text: "shrit but chota h" },
+        { sku: "KURTI123", vendor: "Jaipur Vendor 14", size: "M", label: "fit_too_small", text: "size expected se chota" },
+        { sku: "KURTI123", vendor: "Jaipur Vendor 14", size: "M", label: "fit_too_small", text: "M bahut chota h" },
+        { sku: "KURTI123", vendor: "Jaipur Vendor 14", size: "L", label: "fit_too_tight", text: "shoulder bahut tight" },
+        { sku: "KURTI123", vendor: "Jaipur Vendor 14", size: "L", label: "fit_too_small", text: "kurti achi h but L bhi chota" },
+        { sku: "KURTI123", vendor: "Jaipur Vendor 14", size: "XL", label: "fit_too_loose", text: "bahut loose h" },
+        { sku: "KURTI123", vendor: "Jaipur Vendor 14", size: "L", label: "fit_too_large", text: "size bada hai" },
+        { sku: "SHIRT440", vendor: "Jaipur Vendor 3", size: "XL", label: "fit_too_large", text: "bahut bada h" },
+        { sku: "KURTI991", vendor: "Tiruppur Vendor 6", size: "M", label: "size_chart_mismatch", text: "chart galat hai" },
+        { sku: "KURTI123", vendor: "Jaipur Vendor 14", size: "M", label: "size_chart_mismatch", text: "not true to size" },
+        { sku: "SHIRT440", vendor: "Jaipur Vendor 3", size: "M", label: "not_a_product_issue", text: "delivery late hui" },
+        { sku: "DUPATTA22", vendor: "Jaipur Vendor 14", size: "Free", label: "not_a_product_issue", text: "courier ne wrong item diya" },
+        { sku: "KURTI991", vendor: "Tiruppur Vendor 6", size: "M", label: "colour_image_mismatch", text: "colour photo jaisa nhi hai" },
+        { sku: "KURTI991", vendor: "Tiruppur Vendor 6", size: "M", label: "colour_image_mismatch", text: "photo me navy tha ye black h" },
+        { sku: "KURTI991", vendor: "Tiruppur Vendor 6", size: "L", label: "quality_fabric", text: "kapda transparent hai" },
+        { sku: "SHIRT440", vendor: "Jaipur Vendor 3", size: "M", label: "quality_fabric", text: "cloth patla h" },
+        { sku: "SHIRT440", vendor: "Jaipur Vendor 3", size: "L", label: "description_or_look_mismatch", text: "office shirt nhi lg rha" },
+        { sku: "DUPATTA22", vendor: "Jaipur Vendor 14", size: "Free", label: "quality_stitching_or_damage", text: "stitch nikal gyi" }
+      ],
+      review: [
+        { id: "r1", sku: "KURTI991", vendor: "Tiruppur Vendor 6", size: "M", label: "insufficient_evidence", confidence: 0.42, text: "macha nai lga", note: "Reads like “didn’t like it”. No fit, colour, or fabric reason." },
+        { id: "r2", sku: "KURTI123", vendor: "Jaipur Vendor 14", size: "L", label: "insufficient_evidence", confidence: 0.48, text: "product acha nahi laga", note: "Reads like “didn’t like it”. No fit, colour, or fabric reason." },
+        { id: "r3", sku: "SHIRT440", vendor: "Jaipur Vendor 3", size: "M", label: "fit_too_tight", confidence: 0.58, text: "shrit thoda alg h size", note: "Low confidence. Stronger model did not confirm a size direction." },
+        { id: "r4", sku: "KURTI991", vendor: "Tiruppur Vendor 6", size: "S", label: "quality_fabric", confidence: null, text: "ok return", note: "Validation failed. The model quote was not in the customer’s text, so no score was stored.", failed: true }
+      ]
+    };
+
+    const views = ["dashboard", "review", "upload"];
+    function show(name) {
+      views.forEach((v) => {
+        document.getElementById("view-" + v).classList.toggle("hidden", v !== name);
+        document.getElementById("nav-" + v).classList.toggle("active", v === name);
+      });
+      const titles = {
+        dashboard: ["What “Other” actually says", "Counts below use labels Neha has already accepted. Rows still in review are not included."],
+        review: ["Needs a person", "Approve, edit, or dismiss. Dismissed rows never enter the SKU counts."],
+        upload: ["Upload", "What the sample file did before anyone reviewed it."]
+      };
+      document.getElementById("title").textContent = titles[name][0];
+      document.getElementById("subtitle").textContent = titles[name][1];
+    }
+    views.forEach((v) => document.getElementById("nav-" + v).onclick = () => show(v));
+
+    function totalRows() {
+      return state.accepted.length + state.review.length + state.dismissed;
+    }
+
+    function renderDashboard() {
+      document.getElementById("kpi-total").textContent = totalRows();
+      document.getElementById("kpi-accepted").textContent = state.accepted.length;
+      document.getElementById("kpi-review").textContent = state.review.length;
+      document.getElementById("review-count").textContent = state.review.length;
+
+      const counts = {};
+      state.accepted.forEach((row) => { counts[row.label] = (counts[row.label] || 0) + 1; });
+      const ranked = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+      const max = ranked[0] ? ranked[0][1] : 1;
+      document.getElementById("label-bars").innerHTML = ranked.map(([label, n]) => `
+        <div class="row">
+          <span>${LABELS[label]}</span>
+          <div class="track"><div class="fill" style="width:${Math.round(n / max * 100)}%"></div></div>
+          <strong>${n}</strong>
+        </div>`).join("") || `<p class="empty">No accepted labels yet.</p>`;
+
+      const skus = [...new Set(state.accepted.map((r) => r.sku))];
+      const select = document.getElementById("sku-select");
+      const previous = select.value || "KURTI123";
+      select.innerHTML = skus.map((sku) => `<option>${sku}</option>`).join("");
+      if (skus.includes(previous)) select.value = previous;
+      renderSku();
+    }
+
+    function renderSku() {
+      const sku = document.getElementById("sku-select").value;
+      const rows = state.accepted.filter((r) => r.sku === sku);
+      const box = document.getElementById("sku-detail");
+      if (!rows.length) {
+        box.innerHTML = `<p class="empty">No accepted rows for this SKU.</p>`;
+        return;
+      }
+      const byLabel = {};
+      rows.forEach((r) => { byLabel[r.label] = (byLabel[r.label] || 0) + 1; });
+      const top = Object.entries(byLabel).sort((a, b) => b[1] - a[1])[0][0];
+      const sizes = {};
+      rows.forEach((r) => { sizes[r.size] = (sizes[r.size] || 0) + 1; });
+      const maxSize = Math.max(...Object.values(sizes));
+      box.innerHTML = `
+        <div class="meta">
+          <span class="pill">${rows[0].vendor}</span>
+          <span class="pill ok">${LABELS[top]}</span>
+        </div>
+        <div class="action"><strong>Suggested action.</strong> ${ACTIONS[top]}</div>
+        <div class="sizes">
+          ${Object.entries(sizes).map(([size, n]) => `
+            <div class="row"><span>Size ${size}</span><div class="track"><div class="fill" style="width:${Math.round(n / maxSize * 100)}%"></div></div><strong>${n}</strong></div>
+          `).join("")}
+        </div>
+        <h3 style="margin-top:16px">Evidence</h3>
+        ${rows.slice(0, 4).map((r) => `<blockquote>“${r.text}”</blockquote>`).join("")}
+      `;
+    }
+    document.getElementById("sku-select").onchange = renderSku;
+
+    function renderReview() {
+      const queue = document.getElementById("queue");
+      document.getElementById("review-count").textContent = state.review.length;
+      if (!state.review.length) {
+        queue.innerHTML = `<p class="empty">Review queue is clear. The dashboard is using every remaining accepted label.</p>`;
+        return;
+      }
+      queue.innerHTML = state.review.map((row) => `
+        <article class="review">
+          <header>
+            <div>
+              <div class="quote">“${row.text}”</div>
+              <div class="meta">
+                <span class="pill">${row.sku}</span>
+                <span class="pill">Size ${row.size}</span>
+                <span class="pill">${row.vendor}</span>
+              </div>
+            </div>
+            <div>${row.confidence == null ? "No score" : "Confidence " + row.confidence.toFixed(2)}</div>
+          </header>
+          <p class="warn">${row.note}</p>
+          <div class="actions">
+            <button class="primary" data-act="approve" data-id="${row.id}" type="button">Approve</button>
+            <select data-label="${row.id}" aria-label="Edit label">
+              ${Object.entries(LABELS).map(([k, v]) => `<option value="${k}" ${k === row.label ? "selected" : ""}>${v}</option>`).join("")}
+            </select>
+            <button data-act="edit" data-id="${row.id}" type="button">Save edit</button>
+            <button class="danger" data-act="dismiss" data-id="${row.id}" type="button">Dismiss</button>
+          </div>
+        </article>`).join("");
+    }
+
+    document.getElementById("queue").onclick = (event) => {
+      const button = event.target.closest("button");
+      if (!button) return;
+      const id = button.dataset.id;
+      const index = state.review.findIndex((row) => row.id === id);
+      if (index < 0) return;
+      const row = state.review[index];
+      const act = button.dataset.act;
+      if (act === "dismiss") {
+        state.review.splice(index, 1);
+        state.dismissed += 1;
+      } else {
+        const label = act === "edit"
+          ? document.querySelector(`select[data-label="${id}"]`).value
+          : row.label;
+        state.review.splice(index, 1);
+        state.accepted.push({ sku: row.sku, vendor: row.vendor, size: row.size, label, text: row.text });
+      }
+      renderDashboard();
+      renderReview();
+      renderUpload();
+    };
+
+    function renderUpload() {
+      document.getElementById("upload-body").innerHTML = `
+        <tr><td>Rows in sample</td><td>${totalRows()}</td></tr>
+        <tr><td>Accepted after review</td><td>${state.accepted.length}</td></tr>
+        <tr><td>Still in review</td><td>${state.review.length}</td></tr>
+        <tr><td>Dismissed</td><td>${state.dismissed} — excluded from SKU counts</td></tr>
+        <tr><td>Empty text</td><td>0 dropped</td></tr>
+        <tr><td>Over 1000 characters</td><td>0 dropped</td></tr>
+      `;
+    }
+
+    renderDashboard();
+    renderReview();
+    renderUpload();
+  </script>
+</body>
+</html>

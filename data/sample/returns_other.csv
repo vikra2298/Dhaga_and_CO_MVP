@@ -1,0 +1,18 @@
+return_id,sku,category,vendor,size,return_reason,other_text
+R001,KURTI123,Womenswear,Jaipur Vendor 14,M,Other,shrit but chota h
+R002,KURTI123,Womenswear,Jaipur Vendor 14,M,Other,size expected se chota
+R003,KURTI123,Womenswear,Jaipur Vendor 14,L,Other,shoulder bahut tight
+R004,KURTI991,Womenswear,Tiruppur Vendor 6,M,Other,colour photo jaisa nhi hai
+R005,KURTI991,Womenswear,Tiruppur Vendor 6,L,Other,kapda transparent hai
+R006,KURTI123,Womenswear,Jaipur Vendor 14,L,Other,product acha nahi laga
+R007,KURTI991,Womenswear,Tiruppur Vendor 6,M,Other,macha nai lga
+R008,SHIRT440,Womenswear,Jaipur Vendor 3,M,Other,I didn't like the product
+R009,SHIRT440,Womenswear,Jaipur Vendor 3,M,Other,shrit thoda alg h size
+R010,KURTI991,Womenswear,Tiruppur Vendor 6,S,Other,ok return
+R011,SHIRT440,Womenswear,Jaipur Vendor 3,M,Other,delivery late hui
+R012,KURTI123,Womenswear,Jaipur Vendor 14,L,Other,size bada hai
+R013,KURTI991,Womenswear,Tiruppur Vendor 6,M,Other,chart galat hai
+R014,DUPATTA22,Womenswear,Jaipur Vendor 14,Free,Fit,this row is not Other
+R015,KURTI123,Womenswear,Jaipur Vendor 14,M,Other,
+R016,KURTI124,Womenswear,Jaipur Vendor 14,M,Other,kurti ka colour acha nahi hai 
+

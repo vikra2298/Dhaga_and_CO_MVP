@@ -28,12 +28,21 @@ python -m venv .venv
 
 pip install -r requirements.txt
 cp .env.example .env
-# Add your API keys to .env
+# Add MODEL_A and MODEL_B keys to classify a new file.
+# Without keys the sample dashboard still opens. An upload is refused, not guessed.
 
-streamlit run frontend/main.py
+# Terminal 1 — API
+python -m uvicorn backend.api:app --reload --port 8000
+
+# Terminal 2 — dashboard
+cd frontend
+npm install
+npm run dev
 ```
 
-Open the local URL Streamlit prints (usually `http://localhost:8501`).
+Open `http://127.0.0.1:5173`.
+
+The loaded sample is already classified: 75% or above is counted, including “acha nahi laga”. Review holds one row under 75% and one row with no score. Uploading `data/sample/returns_other.csv` without API keys shows the raw comments and does not change the dashboard.
 
 ## Project layout
 
@@ -46,17 +55,17 @@ Dhaga_&_CO_MVP/
 ├── docs/
 │   ├── discovery_note.md           # Phase 1 (before first code commit)
 │   └── build_note.md               # Phase 2 technical write-up
-├── frontend/                       # UI only (Streamlit)
-│   └── main.py
-├── backend/                        # Logic, models, schemas
-│   ├── workflows/                  # End-to-end orchestration
-│   ├── patterns/                   # Agentic patterns (chain, route, etc.)
-│   └── schemas/                    # Structured / validated outputs
+├── frontend/                       # React dashboard
+│   └── src/
+├── backend/                        # FastAPI, workflows, schemas
+│   ├── api.py
+│   ├── workflows/
+│   └── schemas/
 └── data/
-    └── sample/                     # Real-shaped sample inputs (Hinglish, free text)
+    └── sample/returns_other.csv
 ```
 
-**Separation rule:** `frontend/` renders screens and collects input. `backend/` owns workflows, patterns, schemas, and model calls. Keep product logic out of the UI.
+**Separation rule:** `frontend/` renders screens. `backend/` owns ingest, model calls, the 75% rule, and counts.
 
 ## Deliverables checklist
 
