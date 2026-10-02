@@ -1,1 +1,0 @@
-# Dhaga & Co. MVP package

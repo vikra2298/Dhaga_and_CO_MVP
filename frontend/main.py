@@ -1,6 +1,7 @@
 """
-Dhaga & Co. MVP — frontend entrypoint.
+Dhaga & Co. MVP — frontend entrypoint (Streamlit UI).
 
+UI only. Business logic, workflows, and model calls live in `backend/`.
 Do not build product logic here until docs/discovery_note.md is agreed.
 This stub exists so the repo runs and can be deployed early (brief: deploy something trivial in the first two days).
 """

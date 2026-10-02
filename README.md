@@ -30,7 +30,7 @@ pip install -r requirements.txt
 cp .env.example .env
 # Add your API keys to .env
 
-streamlit run app/main.py
+streamlit run frontend/main.py
 ```
 
 Open the local URL Streamlit prints (usually `http://localhost:8501`).
@@ -46,13 +46,17 @@ Dhaga_&_CO_MVP/
 ├── docs/
 │   ├── discovery_note.md           # Phase 1 (before first code commit)
 │   └── build_note.md               # Phase 2 technical write-up
-├── app/                            # Frontend (Streamlit / Gradio)
+├── frontend/                       # UI only (Streamlit)
 │   └── main.py
-├── src/                            # Workflows, patterns, schemas
-│   └── __init__.py
+├── backend/                        # Logic, models, schemas
+│   ├── workflows/                  # End-to-end orchestration
+│   ├── patterns/                   # Agentic patterns (chain, route, etc.)
+│   └── schemas/                    # Structured / validated outputs
 └── data/
     └── sample/                     # Real-shaped sample inputs (Hinglish, free text)
 ```
+
+**Separation rule:** `frontend/` renders screens and collects input. `backend/` owns workflows, patterns, schemas, and model calls. Keep product logic out of the UI.
 
 ## Deliverables checklist
 

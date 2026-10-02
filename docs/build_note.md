@@ -65,6 +65,12 @@ What sample data proves this is not a curated demo path (Hinglish, free text, me
 
 - `data/sample/...`
 
+## Code layout reminder
+
+- UI: `frontend/`
+- Workflows / patterns / schemas / model clients: `backend/`
+
+
 ## The thing that broke that we did not expect
 
 _[Honest write-up]_
