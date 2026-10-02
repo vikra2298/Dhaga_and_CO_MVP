@@ -126,9 +126,19 @@ h2 { font-family: Fraunces, serif; font-weight: 650; font-size: 40px; margin: 6p
 .banner { background: #fff8ee; border: 1px solid #ead7b8; color: #6d5018; }
 .error { background: var(--clay-soft); border: 1px solid #efd0c8; color: var(--clay); }
 
-.agents { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+.agents { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 18px; }
 .agent h3 { margin: 4px 0 8px; }
 .agent p { margin: 0; color: var(--muted); line-height: 1.45; font-size: 14px; }
+.brief {
+  margin-top: 18px; background: var(--navy); color: #f6f1ea; border-radius: 18px; padding: 20px 22px;
+}
+.brief .kicker { color: #e0b5a6; }
+.brief h3 { font-family: Fraunces, serif; font-size: 28px; font-weight: 650; margin: 6px 0 12px; letter-spacing: -0.02em; color: #fff; }
+.brief-grid { display: grid; grid-template-columns: 1.2fr 0.9fr 0.9fr; gap: 18px; }
+.brief ul { margin: 0; padding-left: 18px; color: #d7cdc2; line-height: 1.5; font-size: 14px; }
+.brief li { margin: 0 0 8px; }
+.brief .brief-label { color: #c9bfb4; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; margin: 0 0 8px; }
+.brief .caveat { margin: 14px 0 0; color: #b7aea4; font-size: 13px; line-height: 1.45; }
 .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
 .report { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 14px; margin-top: 14px; }
 .report h3 { font-family: Fraunces, serif; font-size: 26px; font-weight: 650; letter-spacing: -0.02em; }
@@ -183,7 +193,7 @@ th { color: var(--muted); font-weight: 500; font-size: 12px; }
   .side { position: relative; height: auto; }
   nav { flex-direction: row; flex-wrap: wrap; }
   .side-note { display: none; }
-  .kpis, .split, .drop, .agents, .command .agents, .report, .rail, .gaps, .tones, .ink-split, .sku-board { grid-template-columns: 1fr; display: grid; }
+  .kpis, .split, .drop, .agents, .command .agents, .report, .rail, .gaps, .tones, .ink-split, .sku-board, .brief-grid { grid-template-columns: 1fr; display: grid; }
   .main { padding: 20px 16px 48px; }
   h2 { font-size: 32px; }
   .bar-row { grid-template-columns: 1fr; }

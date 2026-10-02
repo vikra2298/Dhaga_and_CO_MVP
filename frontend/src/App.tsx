@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { api, type Dashboard, type ReviewRow, type SkuDetail, type UploadResult } from "./api";
+import { api, type Dashboard, type OverviewAgent, type ReviewRow, type SkuDetail, type UploadResult } from "./api";
 
 type Page = "metrics" | "dashboard" | "review" | "upload";
 
@@ -162,8 +162,18 @@ export function App() {
                       : "Did not classify. The dashboard is unchanged."}
                   </p>
                 </article>
+                <article className="card agent">
+                  <p className="kicker">Agent 3 · {upload.agents.overview ? "done" : "waiting"}</p>
+                  <h3>Overview</h3>
+                  <p>
+                    {upload.agents.overview
+                      ? upload.agents.overview.headline
+                      : "Weekly brief runs after Review files labels."}
+                  </p>
+                </article>
               </section>
             ) : null}
+            {upload?.agents?.overview ? <WeeklyBrief overview={upload.agents.overview} /> : null}
             {upload ? (
               <article className="card" style={{ marginTop: 14 }}>
                 <h3>{upload.message}</h3>
@@ -210,6 +220,7 @@ function ColourInsight({ data }: { data: Dashboard }) {
   ];
   return (
     <section className="ink">
+      <WeeklyBrief overview={data.agents.overview} />
       <div className="tones">
         {cards.map((card) => (
           <article className={`tone ${card.tone}`} key={card.label}>
@@ -253,6 +264,42 @@ function ColourInsight({ data }: { data: Dashboard }) {
           </article>
         </div>
       </div>
+    </section>
+  );
+}
+
+function WeeklyBrief({ overview }: { overview: OverviewAgent }) {
+  return (
+    <section className="brief" aria-label="Weekly overview">
+      <p className="kicker">Agent 3 · Overview · {overview.source === "model" ? "model brief" : "from counted labels"}</p>
+      <h3>{overview.headline}</h3>
+      <div className="brief-grid">
+        <div>
+          <p className="brief-label">This week</p>
+          <ul>
+            {overview.bullets.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <p className="brief-label">Watch</p>
+          <ul>
+            {(overview.watch.length ? overview.watch : ["No SKU cluster yet."]).map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <p className="brief-label">Neha’s actions</p>
+          <ul>
+            {(overview.actions.length ? overview.actions : ["Nothing queued."]).map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      <p className="caveat">{overview.caveat}</p>
     </section>
   );
 }
@@ -347,7 +394,13 @@ function CommandCenter({
           <h3>Filed or sent to Neha</h3>
           <p>{data.agents.review.detail} Filing a label does not change a listing.</p>
         </article>
+        <article className="card agent">
+          <p className="kicker">Agent · Overview</p>
+          <h3>Weekly brief</h3>
+          <p>{data.agents.overview.detail} {data.agents.overview.headline}</p>
+        </article>
       </section>
+      <WeeklyBrief overview={data.agents.overview} />
     </div>
   );
 }

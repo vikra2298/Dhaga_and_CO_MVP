@@ -1,0 +1,26 @@
+# API only — Vercel hosts the React UI and sets VITE_API_BASE to this service.
+services:
+  - type: web
+    name: dhaga-return-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.api:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: MODEL_A_NAME
+        value: openai/gpt-oss-20b
+      - key: MODEL_A_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: MODEL_B_NAME
+        value: openai/gpt-oss-120b
+      - key: MODEL_B_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: MODEL_A_API_KEY
+        sync: false
+      - key: MODEL_B_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false

@@ -8,9 +8,20 @@ Client engagement MVP for Dhaga & Co., a D2C fashion brand (Bengaluru). Discover
 
 | Phase | Status |
 |-------|--------|
-| 1. Discovery | In progress — fill `docs/discovery_note.md` before coding |
-| 2. Build | Not started |
+| 1. Discovery | Done — `docs/discovery_note.md` (2026-10-01) |
+| 2. Build | Live — [https://dhaga-return-intelligence.vercel.app](https://dhaga-return-intelligence.vercel.app) |
 | 3. Present | Not started |
+
+## Live URL
+
+**Deployed MVP:** [https://dhaga-return-intelligence.vercel.app](https://dhaga-return-intelligence.vercel.app)
+
+Vite frontend + FastAPI backend on one Vercel project (Services). Sample dashboard opens without keys. Upload + classify needs `MODEL_A_*` / `MODEL_B_*` in the Vercel project env.
+
+```bash
+# Redeploy from this repo
+npx vercel deploy --prod
+```
 
 ## Quick start (local)
 
@@ -69,8 +80,8 @@ Dhaga_&_CO_MVP/
 
 ## Deliverables checklist
 
-- [ ] Discovery note (one page, seven required items) — dated before first feature commit
-- [ ] Deployed MVP with a visible frontend and live URL
+- [x] Discovery note (one page, seven required items) — dated before first feature commit
+- [x] Deployed MVP with a visible frontend and live URL
 - [ ] Repository with this README (run, expect, fail visibly)
 - [ ] Build note (code vs model table, patterns, cost line, unexpected break)
 - [ ] Live presentation (20 min incl. questions; every member speaks)

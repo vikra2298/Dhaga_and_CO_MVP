@@ -16,6 +16,16 @@ export type Agents = {
     threshold: number;
     detail: string;
   };
+  overview: {
+    name: string;
+    headline: string;
+    bullets: string[];
+    watch: string[];
+    actions: string[];
+    caveat: string;
+    source: string;
+    detail: string;
+  };
   source: string;
 };
 
@@ -125,6 +135,17 @@ export type ReviewRow = {
   short_reason: string;
 };
 
+export type OverviewAgent = {
+  name: string;
+  headline: string;
+  bullets: string[];
+  watch: string[];
+  actions: string[];
+  caveat: string;
+  source: string;
+  detail: string;
+};
+
 export type UploadResult = {
   classified: boolean;
   message: string;
@@ -136,11 +157,15 @@ export type UploadResult = {
   agents?: {
     intake: { name: string; loaded: number; batches: number; batch_size: number };
     review: { name: string; auto_approved: number; sent_to_neha: number; threshold: number } | null;
+    overview: OverviewAgent | null;
   };
 };
 
+/** Empty in local Vite (proxy /api → :8000). Set VITE_API_BASE on Vercel to the API origin. */
+const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined)?.replace(/\/$/, "") ?? "";
+
 async function read<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(path, init);
+  const response = await fetch(`${API_BASE}${path}`, init);
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
     const detail = typeof body.detail === "string" ? body.detail : "The request failed.";

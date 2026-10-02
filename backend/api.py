@@ -1,5 +1,6 @@
 """Dhaga Return Intelligence API."""
 
+import os
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
@@ -11,10 +12,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from backend.agents.intake import IngestError, load_and_batch
+from backend.agents.overview import overview_public, write_weekly_overview
 from backend.agents.route import classify_and_route
 from backend.schemas.taxonomy import AUTO_APPROVE_AT, LABEL_TITLES
 from backend.store import dashboard, decide, replace_with_run, review_queue, save_pipeline, seed_if_empty, sku_detail
 from backend.workflows.classify import models_configured
+
+
+def _cors_origins() -> list[str]:
+    local = ["http://127.0.0.1:5173", "http://localhost:5173"]
+    extra = [o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()]
+    return local + extra
+
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
@@ -25,7 +34,8 @@ async def lifespan(_app: FastAPI):
 app = FastAPI(title="Dhaga Return Intelligence", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
+    allow_origins=_cors_origins(),
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -110,7 +120,7 @@ async def upload(file: UploadFile = File(...)) -> dict:
             "kept": 0,
             "dropped": intake.dropped,
             "unclassified": [],
-            "agents": {"intake": intake_step, "review": None},
+            "agents": {"intake": intake_step, "review": None, "overview": None},
         }
 
     if not models_configured():
@@ -123,18 +133,33 @@ async def upload(file: UploadFile = File(...)) -> dict:
                 {"return_id": row.return_id, "sku": row.sku, "text": row.other_text}
                 for row in intake.rows[:30]
             ],
-            "agents": {"intake": intake_step, "review": None},
+            "agents": {"intake": intake_step, "review": None, "overview": None},
         }
 
     routed = await classify_and_route(intake)
     replace_with_run(routed.records)
-    save_pipeline(intake.loaded, len(intake.batches), routed.auto_approved, routed.sent_to_neha)
+    snap = dashboard()
+    overview = await write_weekly_overview(
+        total=snap["total"],
+        accepted=snap["accepted"],
+        in_review=snap["in_review"],
+        insights=snap["insights"],
+        auto_approved=routed.auto_approved,
+    )
+    save_pipeline(
+        intake.loaded,
+        len(intake.batches),
+        routed.auto_approved,
+        routed.sent_to_neha,
+        overview,
+    )
     threshold = int(AUTO_APPROVE_AT * 100)
     return {
         "classified": True,
         "message": (
             f"Intake batched {intake.loaded} comments. "
-            f"Review filed {routed.auto_approved} at {threshold}% or above and sent {routed.sent_to_neha} to Neha."
+            f"Review filed {routed.auto_approved} at {threshold}% or above and sent {routed.sent_to_neha} to Neha. "
+            f"Overview wrote the weekly brief."
         ),
         "kept": intake.loaded,
         "dropped": intake.dropped,
@@ -149,5 +174,6 @@ async def upload(file: UploadFile = File(...)) -> dict:
                 "sent_to_neha": routed.sent_to_neha,
                 "threshold": threshold,
             },
+            "overview": overview_public(overview),
         },
     }

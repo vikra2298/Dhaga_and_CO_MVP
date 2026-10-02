@@ -1,9 +1,12 @@
 """SQLite store. Counts stay in code."""
 
+import json
+import os
 import sqlite3
 from pathlib import Path
 
 from backend.agents.intake import BATCH_SIZE
+from backend.agents.overview import OverviewResult, overview_public, template_overview
 from backend.schemas.taxonomy import AUTO_APPROVE_AT, LABEL_TITLES, suggested_action
 
 # Catalogue areas. Actionable ones can change a size chart, image, vendor note, or copy.
@@ -17,7 +20,8 @@ AREAS = (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-DB_PATH = ROOT / "data" / "dhaga.sqlite"
+# Vercel serverless filesystem is read-only except /tmp.
+DB_PATH = Path("/tmp/dhaga.sqlite") if os.getenv("VERCEL") else ROOT / "data" / "dhaga.sqlite"
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS events (
@@ -44,7 +48,8 @@ CREATE TABLE IF NOT EXISTS pipeline (
   batch_size INTEGER NOT NULL,
   auto_approved INTEGER NOT NULL,
   sent_to_neha INTEGER NOT NULL,
-  source TEXT NOT NULL
+  source TEXT NOT NULL,
+  overview_json TEXT
 );
 """
 
@@ -54,6 +59,10 @@ def connect() -> sqlite3.Connection:
     db = sqlite3.connect(DB_PATH)
     db.row_factory = sqlite3.Row
     db.executescript(SCHEMA)
+    cols = {row[1] for row in db.execute("PRAGMA table_info(pipeline)").fetchall()}
+    if "overview_json" not in cols:
+        db.execute("ALTER TABLE pipeline ADD COLUMN overview_json TEXT")
+        db.commit()
     return db
 
 
@@ -92,7 +101,14 @@ def seed_if_empty() -> None:
     db.close()
 
 
-def _agents(loaded: int, batches: int | None, auto_approved: int, sent_to_neha: int, source: str) -> dict:
+def _agents(
+    loaded: int,
+    batches: int | None,
+    auto_approved: int,
+    sent_to_neha: int,
+    source: str,
+    overview: dict | None = None,
+) -> dict:
     threshold = int(AUTO_APPROVE_AT * 100)
     return {
         "intake": {
@@ -116,8 +132,52 @@ def _agents(loaded: int, batches: int | None, auto_approved: int, sent_to_neha: 
                 f"Sent {sent_to_neha} to Neha because they are under {threshold}% or have no score."
             ),
         },
+        "overview": overview
+        or {
+            "name": "Overview",
+            "headline": "Weekly overview not ready yet.",
+            "bullets": [],
+            "watch": [],
+            "actions": [],
+            "caveat": "Upload or open the dashboard after labels are counted.",
+            "source": "none",
+            "detail": "Waiting for counted labels.",
+        },
         "source": source,
     }
+
+
+def _overview_from_rows(rows: list[sqlite3.Row], stored: str | None) -> dict:
+    """Prefer a stored model brief; otherwise build a live template from current counts."""
+    report = insights(rows)
+    accepted = sum(1 for row in rows if row["status"] == "accepted")
+    review = sum(1 for row in rows if row["status"] == "review")
+    auto = sum(1 for row in rows if row["auto_approved"])
+    if stored:
+        try:
+            payload = json.loads(stored)
+            if payload.get("headline") and payload.get("bullets") is not None:
+                payload.setdefault("name", "Overview")
+                return payload
+        except json.JSONDecodeError:
+            pass
+    live = template_overview(
+        {
+            "total_other_comments": len(rows),
+            "counted": accepted,
+            "counted_pct": report["counted_pct"],
+            "still_with_neha": review,
+            "auto_approved": auto,
+            "leave_alone": report["leave_alone"],
+            "leave_pct": report["leave_pct"],
+            "areas": report["areas"],
+            "top_skus": report["products"][:4],
+            "focus": report["focus"],
+            "open_examples": report["attention"][:3],
+            "limits": report["limit"],
+        }
+    )
+    return overview_public(live)
 
 
 def _pct(part: int, whole: int) -> int:
@@ -273,22 +333,54 @@ def insights(rows: list[sqlite3.Row]) -> dict:
     }
 
 
-def save_pipeline(loaded: int, batches: int, auto_approved: int, sent_to_neha: int) -> None:
+def save_pipeline(
+    loaded: int,
+    batches: int,
+    auto_approved: int,
+    sent_to_neha: int,
+    overview: OverviewResult | dict | None = None,
+) -> None:
+    if isinstance(overview, OverviewResult):
+        overview_payload = overview_public(overview)
+    elif isinstance(overview, dict):
+        overview_payload = overview
+    else:
+        overview_payload = None
+    overview_json = json.dumps(overview_payload) if overview_payload else None
     db = connect()
     db.execute(
         """
-        INSERT INTO pipeline (id, loaded, batches, batch_size, auto_approved, sent_to_neha, source)
-        VALUES (1, ?, ?, ?, ?, ?, 'upload')
+        INSERT INTO pipeline (id, loaded, batches, batch_size, auto_approved, sent_to_neha, source, overview_json)
+        VALUES (1, ?, ?, ?, ?, ?, 'upload', ?)
         ON CONFLICT(id) DO UPDATE SET
           loaded = excluded.loaded,
           batches = excluded.batches,
           batch_size = excluded.batch_size,
           auto_approved = excluded.auto_approved,
           sent_to_neha = excluded.sent_to_neha,
-          source = excluded.source
+          source = excluded.source,
+          overview_json = COALESCE(excluded.overview_json, pipeline.overview_json)
         """,
-        (loaded, batches, BATCH_SIZE, auto_approved, sent_to_neha),
+        (loaded, batches, BATCH_SIZE, auto_approved, sent_to_neha, overview_json),
     )
+    db.commit()
+    db.close()
+
+
+def save_overview(overview: OverviewResult | dict) -> None:
+    payload = overview_public(overview) if isinstance(overview, OverviewResult) else overview
+    db = connect()
+    row = db.execute("SELECT id FROM pipeline WHERE id = 1").fetchone()
+    if row:
+        db.execute("UPDATE pipeline SET overview_json = ? WHERE id = 1", (json.dumps(payload),))
+    else:
+        db.execute(
+            """
+            INSERT INTO pipeline (id, loaded, batches, batch_size, auto_approved, sent_to_neha, source, overview_json)
+            VALUES (1, 0, 0, ?, 0, 0, 'sample', ?)
+            """,
+            (BATCH_SIZE, json.dumps(payload)),
+        )
     db.commit()
     db.close()
 
@@ -297,6 +389,7 @@ def dashboard() -> dict:
     db = connect()
     rows = db.execute("SELECT * FROM events").fetchall()
     pipeline = db.execute("SELECT * FROM pipeline WHERE id = 1").fetchone()
+    stored_overview = pipeline["overview_json"] if pipeline else None
     db.close()
     accepted = [row for row in rows if row["status"] == "accepted"]
     review = [row for row in rows if row["status"] == "review"]
@@ -307,6 +400,7 @@ def dashboard() -> dict:
         counts[label] = counts.get(label, 0) + 1
     ranked = sorted(counts.items(), key=lambda item: item[1], reverse=True)
     auto = sum(1 for row in rows if row["auto_approved"])
+    overview = _overview_from_rows(rows, stored_overview)
     if pipeline:
         agents = _agents(
             pipeline["loaded"],
@@ -314,9 +408,10 @@ def dashboard() -> dict:
             pipeline["auto_approved"],
             pipeline["sent_to_neha"],
             pipeline["source"],
+            overview,
         )
     else:
-        agents = _agents(len(rows), None, auto, len(review), "sample")
+        agents = _agents(len(rows), None, auto, len(review), "sample", overview)
     return {
         "total": len(rows),
         "accepted": len(accepted),
@@ -408,6 +503,8 @@ def decide(event_id: str, action: str, label: str | None = None) -> dict | None:
     else:
         db.close()
         raise ValueError("Unknown action.")
+    db.commit()
+    db.execute("UPDATE pipeline SET overview_json = NULL WHERE id = 1")
     db.commit()
     db.close()
     return {"ok": True}

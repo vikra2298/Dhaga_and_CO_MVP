@@ -27,3 +27,5 @@ build/
 *.log
 node_modules/
 *.sqlite
+
+.vercel
